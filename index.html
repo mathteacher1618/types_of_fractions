@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>假分數與帶分數</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang HK", "Microsoft JhengHei", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            touch-action: manipulation;
+        }
+
+        /* Top Navigation Header */
+        header {
+            background-color: #2c5282;
+            color: white;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Main Container */
+        .container {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-title {
+            color: #1a365d;
+            font-size: 28px;
+            margin-bottom: 32px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        /* Card Layouts */
+        .cards-grid {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 24px;
+            width: 300px;
+            min-height: 190px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card:hover, .card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-color: #3182ce;
+        }
+
+        .card-title {
+            font-size: 22px;
+            color: #2b6cb0;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-desc {
+            font-size: 15px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        /* Breadcrumb / Nav Back Button */
+        .btn-back-stage {
+            background-color: white;
+            border: 1px solid #cbd5e0;
+            color: #2d3748;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .btn-back-stage:hover, .btn-back-stage:active {
+            background-color: #f7fafc;
+            border-color: #a0aec0;
+            color: #1a202c;
+        }
+
+        .quiz-wrapper {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Question Box Styling */
+        .quiz-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            margin-top: 16px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: #edf2f7;
+            height: 10px;
+            border-radius: 5px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3182ce;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #718096;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .question-content {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Math Fraction Display & Inputs */
+        .fraction-display {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .fraction-num {
+            border-bottom: 2px solid #2d3748;
+            padding: 0 4px 2px 4px;
+        }
+
+        .fraction-den {
+            padding: 2px 4px 0 4px;
+        }
+
+        .mixed-fraction {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .fraction-input-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 24px 0;
+            justify-content: center;
+        }
+
+        /* iPad 專屬輸入框優化（使用 type="text" 防止滾輪與上下鍵微調） */
+        .math-input {
+            width: 68px;
+            height: 56px;
+            font-size: 22px;
+            text-align: center;
+            border: 2px solid #cbd5e0;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            background-color: #fff;
+        }
+
+        .math-input:focus {
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.25);
+        }
+
+        .fraction-inputs {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .fraction-line {
+            width: 68px;
+            height: 2px;
+            background-color: #2d3748;
+        }
+
+        /* Action Buttons */
+        .btn {
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: inline-block;
+            margin-top: 10px;
+            min-height: 48px;
+        }
+
+        .btn:hover, .btn:active {
+            background-color: #2b6cb0;
+        }
+
+        .btn-success {
+            background-color: #38a169;
+        }
+
+        .btn-success:hover, .btn-success:active {
+            background-color: #2f855a;
+        }
+
+        .btn-secondary {
+            background-color: #4a5568;
+        }
+
+        .btn-secondary:hover, .btn-secondary:active {
+            background-color: #2d3748;
+        }
+
+        /* Feedback Box */
+        .feedback-box {
+            margin-top: 24px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+            text-align: center;
+        }
+
+        .feedback-success {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            color: #22543d;
+        }
+
+        .feedback-retry {
+            background-color: #fffaf0;
+            border: 1px solid #feebc8;
+            color: #7b341e;
+        }
+
+        .feedback-solution {
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #9b2c2c;
+        }
+
+        .feedback-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .feedback-desc {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .solution-steps {
+            margin-top: 8px;
+            padding-left: 20px;
+            text-align: left;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Analysis Screen */
+        .report-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 680px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .report-header h2 {
+            font-size: 26px;
+            color: #1a202c;
+            margin-bottom: 8px;
+        }
+
+        .report-header .sub-score {
+            font-size: 16px;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .section-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #edf2f7;
+        }
+
+        .section-box-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .analysis-text-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .analysis-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .analysis-tag {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .tag-strength { color: #38a169; }
+        .tag-weakness { color: #e53e3e; }
+
+        .list-empty-text {
+            color: #a0aec0;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item-row {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .item-row.correct-row {
+            border-color: #c6f6d5;
+            background-color: #f0fff4;
+        }
+
+        .item-row.wrong-row {
+            border-color: #fed7d7;
+            background-color: #fff5f5;
+        }
+
+        .q-title {
+            font-weight: bold;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ans-details {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .user-ans { color: #e53e3e; font-weight: 600; }
+        .correct-ans { color: #2b6cb0; font-weight: 600; }
+
+        .report-actions {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 28px;
+        }
+
+        /* Modal Popup */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transform: scale(0.9);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 12px;
+        }
+
+        .modal-desc {
+            font-size: 15px;
+            color: #4a5568;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* iPad 及平版 RWD 適應 */
+        @media (max-width: 834px) {
+            header { padding: 14px 20px; }
+            .container { padding: 20px 16px; }
+            .page-title { font-size: 24px; margin-bottom: 24px; }
+            .cards-grid { flex-direction: column; align-items: center; }
+            .card { width: 100%; max-width: 400px; }
+            .quiz-card, .report-card { padding: 24px 20px; }
+            .math-input { width: 62px; height: 52px; font-size: 20px; }
+            .fraction-line { width: 62px; }
+            .item-row { flex-direction: column; align-items: flex-start; }
+            .ans-details { margin-top: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="logo" id="site-logo" onclick="goHome()">假分數與帶分數</div>
+        <button class="lang-btn" id="lang-toggle-btn" onclick="toggleLanguage()">English</button>
+    </header>
+
+    <div class="container">
+
+        <!-- VIEW 1: MAIN HOME -->
+        <div id="view-home" style="width: 100%;">
+            <h1 class="page-title" id="home-title">請選擇學習單元</h1>
+            <div class="cards-grid">
+                <div class="card" onclick="selectTopic('improper-mixed')">
+                    <div class="card-title" id="topic1-title">假分數與帶分數</div>
+                    <div class="card-desc" id="topic1-desc">掌握假分數與帶分數相互互換的計算技巧與基礎觀念。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: LEVEL SELECTION -->
+        <div id="view-levels" style="width: 100%; display: none;">
+            <div style="margin-bottom: 20px;">
+                <button class="btn-back-stage" onclick="goHome()">
+                    <span>←</span> <span id="back-home-txt">返回主頁</span>
+                </button>
+            </div>
+            <h1 class="page-title" id="level-title">請選擇學習階段</h1>
+            <div class="cards-grid">
+                <div class="card" onclick="startQuiz(1)">
+                    <div class="card-title" id="lvl1-title">第一階段</div>
+                    <div class="card-desc" id="lvl1-desc">帶分數轉假分數<br>學習將帶分數化為假分數。</div>
+                </div>
+                <div class="card" onclick="startQuiz(2)">
+                    <div class="card-title" id="lvl2-title">第二階段</div>
+                    <div class="card-desc" id="lvl2-desc">假分數轉帶分數<br>學習將假分數化為帶分數。</div>
+                </div>
+                <div class="card" onclick="startQuiz(3)">
+                    <div class="card-title" id="lvl3-title">階段式綜合挑戰 🔥</div>
+                    <div class="card-desc" id="lvl3-desc">混合出現帶分數與假分數互換的進階題目。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: QUIZ QUESTION -->
+        <div id="view-quiz" style="width: 100%; display: none; align-items: center; flex-direction: column;">
+            <div class="quiz-wrapper">
+                <button class="btn-back-stage" onclick="goLevelSelect()">
+                    <span>←</span> <span id="back-level-txt">返回階段選擇</span>
+                </button>
+
+                <div class="quiz-card">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="question-header">
+                        <span id="quiz-level-name">第一階段：帶分數轉假分數</span>
+                        <span id="question-tracker">題目 1 / 10</span>
+                    </div>
+
+                    <div class="question-content" id="question-text"></div>
+
+                    <div class="fraction-input-container" id="input-container"></div>
+
+                    <div style="text-align: center;">
+                        <button class="btn" id="submit-btn" onclick="checkAnswer()">提交答案</button>
+                    </div>
+
+                    <!-- Feedback Area -->
+                    <div class="feedback-box feedback-success" id="feedback-success">
+                        <div class="feedback-title">
+                            <span>🎉</span> <span id="success-title-txt">Great job!</span>
+                        </div>
+                        <div class="feedback-desc" id="success-desc-txt">你的計算非常準確，繼續保持！</div>
+                        <button class="btn btn-success" id="next-btn-txt" onclick="nextQuestion()">下一題</button>
+                    </div>
+
+                    <div class="feedback-box feedback-retry" id="feedback-retry">
+                        <div class="feedback-title">
+                            <span>💪</span> <span id="retry-title-txt">還差一點點，再試試看！</span>
+                        </div>
+                        <div class="feedback-desc" id="retry-hint-txt"></div>
+                        <button class="btn" id="retry-btn-txt" style="background-color: #dd6b20;" onclick="checkAnswer()">再試一次</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: ANALYSIS / RESULT -->
+        <div id="view-analysis" style="width: 100%; display: none; align-items: center; flex-direction: column;">
+            <div class="report-card">
+                <div class="report-header">
+                    <h2>🎉 <span id="report-congrats-title">恭喜完成 10 題練習！</span></h2>
+                    <div class="sub-score" id="report-sub-score">一次答對題數: 0 / 10</div>
+                </div>
+
+                <!-- 1. 強弱項分析報告 -->
+                <div class="section-box">
+                    <div class="section-box-title">
+                        <span>📊</span> <span id="report-analysis-title">強弱項分析報告</span>
+                    </div>
+                    <div class="analysis-text-group">
+                        <div class="analysis-line">
+                            <span class="analysis-tag tag-strength" id="tag-strength-txt">💪 強項分析：</span>
+                            <span id="strength-detail-txt"></span>
+                        </div>
+                        <div class="analysis-line">
+                            <span class="analysis-tag tag-weakness" id="tag-weakness-txt">🎯 需要補強：</span>
+                            <span id="weakness-detail-txt"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. 答對的題目 -->
+                <div class="section-box">
+                    <div class="section-box-title" style="color: #276749;">
+                        <span>✅</span> <span id="report-correct-title">答對的題目</span>
+                    </div>
+                    <div class="item-list" id="correct-items-list"></div>
+                </div>
+
+                <!-- 3. 答錯 / 需要協助的題目 -->
+                <div class="section-box">
+                    <div class="section-box-title" style="color: #9b2c2c;">
+                        <span>❌</span> <span id="report-wrong-title">答錯 / 需要協助的題目</span>
+                    </div>
+                    <div class="item-list" id="wrong-items-list"></div>
+                </div>
+
+                <!-- 底部操作按鈕 -->
+                <div class="report-actions">
+                    <button class="btn btn-secondary" onclick="goHome()" id="report-btn-home">返回首頁</button>
+                    <button class="btn" onclick="openRetryModal()" id="report-btn-retry">我想再試</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Dialog -->
+    <div class="modal-overlay" id="modal-retry">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title-txt">準備好挑戰了嗎？</div>
+            <div class="modal-desc" id="modal-desc-txt">系統將為你重新生成 10 道全新的練習題目！</div>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn" style="background-color: #cbd5e0; color: #2d3748;" onclick="closeRetryModal()" id="modal-cancel-btn">取消</button>
+                <button class="btn" onclick="confirmRetry()" id="modal-confirm-btn">開始練習</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        /* 完全停用鍵盤方向鍵 (Up/Down) 與特殊非數字按鍵 */
+        function handleKeydown(e) {
+            // 阻擋鍵盤 Up (38) 與 Down (40) 鍵改變數字
+            if (e.keyCode === 38 || e.keyCode === 40) {
+                e.preventDefault();
+                return;
+            }
+
+            // 允許: Backspace, Delete, Tab, Escape, Enter, 數字鍵
+            if ([46, 8, 9, 27, 13].indexOf(e.keyCode) !== -1 ||
+                (e.keyCode >= 48 && e.keyCode <= 57) || 
+                (e.keyCode >= 96 && e.keyCode <= 105)) {
+                return;
+            }
+            // 阻擋 -, +, e, . 等無效字元
+            if (e.key === '-' || e.key === '+' || e.key === 'e' || e.key === '.') {
+                e.preventDefault();
+            }
+        }
+
+        /* 阻擋滑鼠滾輪/觸控滾點改變數值 */
+        function preventWheel(e) {
+            e.preventDefault();
+        }
+
+        function filterInput(inputEl) {
+            inputEl.value = inputEl.value.replace(/[^0-9]/g, '');
+        }
+
+        const i18n = {
+            zh: {
+                siteTitle: "假分數與帶分數",
+                langToggle: "English",
+                homeTitle: "請選擇學習單元",
+                topic1Title: "假分數與帶分數",
+                topic1Desc: "掌握假分數與帶分數相互互換的計算技巧與基礎觀念。",
+                backHome: "返回主頁",
+                backLevel: "返回階段選擇",
+                levelTitle: "請選擇學習階段",
+                lvl1Title: "第一階段",
+                lvl1Desc: "帶分數轉假分數<br>學習將帶分數化為假分數。",
+                lvl2Title: "第二階段",
+                lvl2Desc: "假分數轉帶分數<br>學習將假分數化為帶分數。",
+                lvl3Title: "挑戰階段 🔥",
+                lvl3Desc: "綜合出現帶分數與假分數互換的進階題目。",
+                qTracker: "題目",
+                convertPrompt1: "請將帶分數化為最簡假分數：",
+                convertPrompt2: "請將假分數化為最簡帶分數或整數：",
+                submit: "提交答案",
+                correctTitle: "太棒了！答對了！",
+                correctDesc: "你的計算非常準確，繼續保持！",
+                nextBtn: "下一題",
+                wrongTitle: "還差一點點，再試試看！",
+                retryBtn: "再試一次",
+                modalTitle: "準備好挑戰了嗎？",
+                modalDesc: "系統將為你重新生成 10 道全新的練習題目！",
+                modalCancel: "取消",
+                modalConfirm: "開始練習",
+                phWhole: "整數",
+                phNum: "分子",
+                phDen: "分母",
+                praiseList: ["非常好！", "太厲害了！", "答對了，真棒！", "極佳的數學思維！"],
+                hintM2I: "<b>【解題思路】帶分數轉假分數（答案須約至最簡）：</b><br>1. 將整數乘以分母，加上原有分子，得到新分子。<br>2. <b>注意：答案必須約至最簡分數！</b><br>加油，請重新輸入數字再試一次！",
+                hintI2M: "<b>【解題思路】假分數轉帶分數（答案須約至最簡）：</b><br>1. 用分子除以分母，商數為整數部分，餘數為新分子。<br>2. <b>注意：分數部分必須約至最簡分數！</b>（若能整除則填寫整數即可）<br>加油，請重新輸入數字再試一次！",
+                analysisLevel1Name: "帶分數轉假分數",
+                analysisLevel2Name: "假分數轉帶分數",
+                analysisLevel3Name: "階段式綜合挑戰",
+                congratsTitle: "恭喜完成 10 題練習！",
+                subScoreTxt: "一次答對題數",
+                reportAnalysisTitle: "強弱項分析報告",
+                tagStrength: "💪 強項分析：",
+                tagWeakness: "🎯 需要補強：",
+                reportCorrectTitle: "答對的題目",
+                reportWrongTitle: "答錯 / 需要協助的題目",
+                noCorrectMsg: "無答對題目",
+                noWrongMsg: "太棒了！全對完全不需要補強！",
+                btnHome: "返回首頁",
+                btnRetry: "我想再試",
+                qPrefix: "第",
+                qSuffix: "題",
+                yourAns: "你的回答",
+                correctAns: "正確答案",
+                strHigh: "概念掌握非常出色，運算準確度極高！",
+                strMid: "轉換運算態度良好，能順利解答大部分題目！",
+                strLow: "已具備基礎的分數觀念，能嘗試進行簡單換算。",
+                weakHigh: "表現優異，無明顯需要補強之處，請繼續保持！",
+                weakMid: "在分數約分至最簡、或帶分數與假分數的分子計算細節上仍需留意。",
+                weakLow: "在分數互換過程（如整數與分母相乘、分子相加及約分）需再多練習以強化記憶。"
+            },
+            en: {
+                siteTitle: "Improper & Mixed Fractions",
+                langToggle: "繁體中文",
+                homeTitle: "Select Learning Topic",
+                topic1Title: "Improper & Mixed Fractions",
+                topic1Desc: "Master the conversion techniques between improper fractions and mixed numbers.",
+                backHome: "Back to Home",
+                backLevel: "Back to Stage Selection",
+                levelTitle: "Select Learning Stage",
+                lvl1Title: "Stage 1",
+                lvl1Desc: "Mixed Number → Improper Fraction<br>Convert mixed numbers to simplified improper fractions.",
+                lvl2Title: "Stage 2",
+                lvl2Desc: "Improper Fraction → Mixed Number<br>Convert improper fractions to simplified mixed numbers.",
+                lvl3Title: "Challenge Stage 🔥",
+                lvl3Desc: "Mixed conversion questions combining both concepts.",
+                qTracker: "Question",
+                convertPrompt1: "Convert the mixed number to the simplest improper fraction:",
+                convertPrompt2: "Convert the improper fraction to the simplest mixed number or integer:",
+                submit: "Submit",
+                correctTitle: "Great job!",
+                correctDesc: "Your calculation is very accurate, keep up the good work!",
+                nextBtn: "Next Question",
+                wrongTitle: "Not quite right, try again!",
+                retryBtn: "Try Again",
+                modalTitle: "Ready for the challenge?",
+                modalDesc: "The system will generate 10 brand new questions for you!",
+                modalCancel: "Cancel",
+                modalConfirm: "Start Practice",
+                phWhole: "W",
+                phNum: "N",
+                phDen: "D",
+                praiseList: ["Great job!", "Awesome!", "Correct, well done!", "Excellent math logic!"],
+                hintM2I: "<b>【Solving Guide】Mixed to Improper (Must simplify):</b><br>1. Multiply whole number by denominator, add numerator for new numerator.<br>2. <b>Make sure to reduce to the simplest fraction!</b><br>Keep going! Please re-enter your answer and try again.",
+                hintI2M: "<b>【Solving Guide】Improper to Mixed (Must simplify):</b><br>1. Divide numerator by denominator: quotient = whole, remainder = numerator.<br>2. <b>Reduce fraction part to lowest terms!</b><br>Keep going! Please re-enter your answer and try again.",
+                analysisLevel1Name: "Mixed to Improper Fractions",
+                analysisLevel2Name: "Improper to Mixed Fractions",
+                analysisLevel3Name: "Comprehensive Stage Challenge",
+                congratsTitle: "Congratulations on completing 10 questions!",
+                subScoreTxt: "First-try score",
+                reportAnalysisTitle: "Performance Analysis Report",
+                tagStrength: "💪 Strengths:",
+                tagWeakness: "🎯 Areas to Improve:",
+                reportCorrectTitle: "Correct Questions",
+                reportWrongTitle: "Incorrect / Needs Help",
+                noCorrectMsg: "No correct questions",
+                noWrongMsg: "Perfect! All questions answered correctly on first try!",
+                btnHome: "Back to Home",
+                btnRetry: "Try Again",
+                qPrefix: "Q",
+                qSuffix: "",
+                yourAns: "Your Answer",
+                correctAns: "Correct Answer",
+                strHigh: "Excellent conceptual understanding and calculation accuracy!",
+                strMid: "Good performance and clear logic through most fraction conversions!",
+                strLow: "Understands fundamental concepts and attempts simple conversions.",
+                weakHigh: "Outstanding work! No major areas needing improvement.",
+                weakMid: "Pay extra attention to reducing fractions to lowest terms and numerator addition.",
+                weakLow: "Review step-by-step conversion rules (multiplication, addition, and simplification)."
+            }
+        };
+
+        let currentLang = 'zh';
+        let currentLevel = 1;
+        let currentQuestionIndex = 0;
+        let questions = [];
+        let userStats = {
+            total: 10,
+            firstTryCorrectCount: 0,
+            records: []
+        };
+        let currentAttempts = 0;
+
+        function updateLanguageUI() {
+            const t = i18n[currentLang];
+            document.getElementById('site-logo').innerText = t.siteTitle;
+            document.getElementById('lang-toggle-btn').innerText = t.langToggle;
+            document.getElementById('home-title').innerText = t.homeTitle;
+            document.getElementById('topic1-title').innerText = t.topic1Title;
+            document.getElementById('topic1-desc').innerText = t.topic1Desc;
+            document.getElementById('back-home-txt').innerText = t.backHome;
+            document.getElementById('back-level-txt').innerText = t.backLevel;
+            document.getElementById('level-title').innerText = t.levelTitle;
+            
+            document.getElementById('lvl1-title').innerText = t.lvl1Title;
+            document.getElementById('lvl1-desc').innerHTML = t.lvl1Desc;
+            document.getElementById('lvl2-title').innerText = t.lvl2Title;
+            document.getElementById('lvl2-desc').innerHTML = t.lvl2Desc;
+            document.getElementById('lvl3-title').innerText = t.lvl3Title;
+            document.getElementById('lvl3-desc').innerHTML = t.lvl3Desc;
+
+            document.getElementById('submit-btn').innerText = t.submit;
+            document.getElementById('success-title-txt').innerText = t.correctTitle;
+            document.getElementById('success-desc-txt').innerText = t.correctDesc;
+            document.getElementById('next-btn-txt').innerText = t.nextBtn;
+            document.getElementById('retry-title-txt').innerText = t.wrongTitle;
+            document.getElementById('retry-btn-txt').innerText = t.retryBtn;
+
+            document.getElementById('modal-title-txt').innerText = t.modalTitle;
+            document.getElementById('modal-desc-txt').innerText = t.modalDesc;
+            document.getElementById('modal-cancel-btn').innerText = t.modalCancel;
+            document.getElementById('modal-confirm-btn').innerText = t.modalConfirm;
+
+            document.getElementById('report-congrats-title').innerText = t.congratsTitle;
+            document.getElementById('report-analysis-title').innerText = t.reportAnalysisTitle;
+            document.getElementById('tag-strength-txt').innerText = t.tagStrength;
+            document.getElementById('tag-weakness-txt').innerText = t.tagWeakness;
+            document.getElementById('report-correct-title').innerText = t.reportCorrectTitle;
+            document.getElementById('report-wrong-title').innerText = t.reportWrongTitle;
+            document.getElementById('report-btn-home').innerText = t.btnHome;
+            document.getElementById('report-btn-retry').innerText = t.btnRetry;
+
+            if (document.getElementById('view-quiz').style.display !== 'none') {
+                loadQuestion();
+            } else if (document.getElementById('view-analysis').style.display !== 'none') {
+                showAnalysis();
+            }
+
+            if (document.getElementById('view-home').style.display === 'none') {
+                document.getElementById('lang-toggle-btn').style.display = 'none';
+            } else {
+                document.getElementById('lang-toggle-btn').style.display = 'inline-flex';
+            }
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguageUI();
+        }
+
+        function showView(viewId) {
+            document.getElementById('view-home').style.display = 'none';
+            document.getElementById('view-levels').style.display = 'none';
+            document.getElementById('view-quiz').style.display = 'none';
+            document.getElementById('view-analysis').style.display = 'none';
+
+            document.getElementById(viewId).style.display = (viewId === 'view-quiz' || viewId === 'view-analysis') ? 'flex' : 'block';
+
+            if (viewId === 'view-home') {
+                document.getElementById('lang-toggle-btn').style.display = 'inline-flex';
+            } else {
+                document.getElementById('lang-toggle-btn').style.display = 'none';
+            }
+        }
+
+        function goHome() {
+            showView('view-home');
+        }
+
+        function goLevelSelect() {
+            showView('view-levels');
+        }
+
+        function selectTopic(topic) {
+            showView('view-levels');
+        }
+
+        function clearInputs() {
+            const inpWhole = document.getElementById('inp-whole');
+            const inpNum = document.getElementById('inp-num');
+            const inpDen = document.getElementById('inp-den');
+
+            if (inpWhole) inpWhole.value = '';
+            if (inpNum) inpNum.value = '';
+            if (inpDen) inpDen.value = '';
+
+            if (inpWhole) {
+                inpWhole.focus();
+            } else if (inpNum) {
+                inpNum.focus();
+            }
+        }
+
+        function generateQuestions(level) {
+            let qArray = [];
+            let usedSet = new Set();
+
+            while (qArray.length < 10) {
+                let type = level;
+                if (level === 3) {
+                    type = Math.random() < 0.5 ? 1 : 2;
+                }
+
+                let d = Math.floor(Math.random() * 8) + 2;
+                let w = Math.floor(Math.random() * 5) + 1;
+                let n = Math.floor(Math.random() * (d - 1)) + 1;
+
+                let key = `${type}-${w}-${n}-${d}`;
+                if (!usedSet.has(key)) {
+                    usedSet.add(key);
+                    
+                    let targetNum = 0;
+                    let targetDen = d;
+                    let targetWhole = 0;
+
+                    if (type === 1) {
+                        let rawNum = w * d + n;
+                        let commonGcd = gcd(rawNum, d);
+                        targetNum = rawNum / commonGcd;
+                        targetDen = d / commonGcd;
+                        targetWhole = 0;
+                    } else {
+                        let rawNum = n;
+                        let commonGcd = gcd(rawNum, d);
+                        targetNum = rawNum / commonGcd;
+                        targetDen = d / commonGcd;
+                        targetWhole = w;
+                    }
+
+                    let questionObj = {
+                        index: qArray.length + 1,
+                        type: type,
+                        whole: w,
+                        num: n,
+                        den: d,
+                        targetWhole: targetWhole,
+                        targetNum: targetNum,
+                        targetDen: targetDen
+                    };
+                    qArray.push(questionObj);
+                }
+            }
+            return qArray;
+        }
+
+        function startQuiz(level) {
+            currentLevel = level;
+            questions = generateQuestions(level);
+            currentQuestionIndex = 0;
+            userStats = {
+                total: 10,
+                firstTryCorrectCount: 0,
+                records: []
+            };
+            showView('view-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            currentAttempts = 0;
+            const q = questions[currentQuestionIndex];
+            const t = i18n[currentLang];
+
+            const retryBox = document.getElementById('feedback-retry');
+            retryBox.className = "feedback-box feedback-retry";
+            retryBox.style.display = 'none';
+
+            document.getElementById('feedback-success').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+
+            document.getElementById('progress-bar').style.width = `${((currentQuestionIndex) / 10) * 100}%`;
+            document.getElementById('question-tracker').innerText = `${t.qTracker} ${currentQuestionIndex + 1} / 10`;
+
+            let levelText = "";
+            if (currentLevel === 1) levelText = t.lvl1Title + "：" + t.analysisLevel1Name;
+            else if (currentLevel === 2) levelText = t.lvl2Title + "：" + t.analysisLevel2Name;
+            else levelText = t.lvl3Title;
+            document.getElementById('quiz-level-name').innerText = levelText;
+
+            const qContainer = document.getElementById('question-text');
+            const inputContainer = document.getElementById('input-container');
+
+            /* 改用 type="text" + inputmode="numeric"，徹底取消數字輸入框的微調/滾輪增減功能 */
+            if (q.type === 1) {
+                qContainer.innerHTML = `
+                    <span>${t.convertPrompt1}</span>
+                    <div class="mixed-fraction">
+                        <span>${q.whole}</span>
+                        <div class="fraction-display">
+                            <span class="fraction-num">${q.num}</span>
+                            <span class="fraction-den">${q.den}</span>
+                        </div>
+                    </div>
+                    <span>=</span>
+                `;
+
+                inputContainer.innerHTML = `
+                    <div class="fraction-inputs">
+                        <input type="text" id="inp-num" class="math-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" onkeydown="handleKeydown(event)" onwheel="preventWheel(event)" oninput="filterInput(this)" placeholder="${t.phNum}">
+                        <div class="fraction-line"></div>
+                        <input type="text" id="inp-den" class="math-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" onkeydown="handleKeydown(event)" onwheel="preventWheel(event)" oninput="filterInput(this)" placeholder="${t.phDen}">
+                    </div>
+                `;
+            } else {
+                let impNum = q.whole * q.den + q.num;
+                qContainer.innerHTML = `
+                    <span>${t.convertPrompt2}</span>
+                    <div class="fraction-display" style="font-size:26px; font-weight:bold;">
+                        <span class="fraction-num">${impNum}</span>
+                        <span class="fraction-den">${q.den}</span>
+                    </div>
+                    <span>=</span>
+                `;
+
+                inputContainer.innerHTML = `
+                    <input type="text" id="inp-whole" class="math-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" onkeydown="handleKeydown(event)" onwheel="preventWheel(event)" oninput="filterInput(this)" placeholder="${t.phWhole}">
+                    <div class="fraction-inputs">
+                        <input type="text" id="inp-num" class="math-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" onkeydown="handleKeydown(event)" onwheel="preventWheel(event)" oninput="filterInput(this)" placeholder="${t.phNum}">
+                        <div class="fraction-line"></div>
+                        <input type="text" id="inp-den" class="math-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" onkeydown="handleKeydown(event)" onwheel="preventWheel(event)" oninput="filterInput(this)" placeholder="${t.phDen}">
+                    </div>
+                `;
+            }
+
+            clearInputs();
+        }
+
+        function formatUserAnswerString(q, inpWholeVal, inpNumVal, inpDenVal) {
+            if (q.type === 1) {
+                let n = inpNumVal !== "" ? inpNumVal : "?";
+                let d = inpDenVal !== "" ? inpDenVal : "?";
+                return `${n}/${d}`;
+            } else {
+                let w = inpWholeVal !== "" ? inpWholeVal : "";
+                let n = inpNumVal !== "" ? inpNumVal : "";
+                let d = inpDenVal !== "" ? inpDenVal : "";
+
+                if (n !== "" && d !== "") {
+                    return w !== "" ? `${w} ${n}/${d}` : `${n}/${d}`;
+                } else if (w !== "") {
+                    return `${w}`;
+                } else {
+                    return "?";
+                }
+            }
+        }
+
+        function formatCorrectAnswerString(q) {
+            if (q.type === 1) {
+                return `${q.targetNum}/${q.targetDen}`;
+            } else {
+                if (q.targetNum === 0) {
+                    return `${q.targetWhole}`;
+                } else {
+                    return `${q.targetWhole} ${q.targetNum}/${q.targetDen}`;
+                }
+            }
+        }
+
+        function formatQuestionDisplayString(q) {
+            if (q.type === 1) {
+                return `${q.whole} ${q.num}/${q.den}`;
+            } else {
+                let impNum = q.whole * q.den + q.num;
+                return `${impNum}/${q.den}`;
+            }
+        }
+
+        function checkAnswer() {
+            const q = questions[currentQuestionIndex];
+            const t = i18n[currentLang];
+            let isCorrect = false;
+
+            const inpWholeVal = document.getElementById('inp-whole') ? document.getElementById('inp-whole').value.trim() : "";
+            const inpNumVal = document.getElementById('inp-num') ? document.getElementById('inp-num').value.trim() : "";
+            const inpDenVal = document.getElementById('inp-den') ? document.getElementById('inp-den').value.trim() : "";
+
+            let userWhole = parseInt(inpWholeVal) || 0;
+            let userNum = parseInt(inpNumVal);
+            let userDen = parseInt(inpDenVal);
+
+            if (q.type === 1) {
+                if (userNum === q.targetNum && userDen === q.targetDen) {
+                    isCorrect = true;
+                }
+            } else {
+                if (q.targetNum === 0) {
+                    if (userWhole === q.targetWhole && (isNaN(userNum) || userNum === 0)) {
+                        isCorrect = true;
+                    }
+                } else {
+                    if (userWhole === q.targetWhole && userNum === q.targetNum && userDen === q.targetDen) {
+                        isCorrect = true;
+                    }
+                }
+            }
+
+            if (isCorrect) {
+                document.getElementById('submit-btn').style.display = 'none';
+                
+                if (currentAttempts === 0) {
+                    userStats.firstTryCorrectCount++;
+                    userStats.records.push({
+                        qIndex: q.index,
+                        questionText: formatQuestionDisplayString(q),
+                        firstTryCorrect: true,
+                        firstWrongAnswer: null,
+                        correctAnswer: formatCorrectAnswerString(q)
+                    });
+                }
+
+                const randomPraise = t.praiseList[Math.floor(Math.random() * t.praiseList.length)];
+                document.getElementById('success-title-txt').innerText = randomPraise;
+                document.getElementById('feedback-success').style.display = 'block';
+                document.getElementById('feedback-retry').style.display = 'none';
+            } else {
+                currentAttempts++;
+
+                if (currentAttempts === 1) {
+                    let wrongAnsStr = formatUserAnswerString(q, inpWholeVal, inpNumVal, inpDenVal);
+                    userStats.records.push({
+                        qIndex: q.index,
+                        questionText: formatQuestionDisplayString(q),
+                        firstTryCorrect: false,
+                        firstWrongAnswer: wrongAnsStr,
+                        correctAnswer: formatCorrectAnswerString(q)
+                    });
+                }
+
+                const retryBox = document.getElementById('feedback-retry');
+                const retryTitle = document.getElementById('retry-title-txt');
+                const retryHint = document.getElementById('retry-hint-txt');
+                const retryBtn = document.getElementById('retry-btn-txt');
+
+                if (currentAttempts < 3) {
+                    retryBox.className = "feedback-box feedback-retry";
+                    retryTitle.innerHTML = currentLang === 'zh' ? `💪 加油！再試一次 (第 ${currentAttempts}/3 次嘗試)` : `💪 Keep going! Try again (${currentAttempts}/3)`;
+                    
+                    let hint = q.type === 1 ? t.hintI2M : t.hintM2I;
+                    retryHint.innerHTML = hint;
+                    retryBtn.innerText = t.retryBtn;
+                    retryBtn.onclick = checkAnswer;
+
+                    document.getElementById('submit-btn').style.display = 'none';
+                    retryBox.style.display = 'block';
+                    document.getElementById('feedback-success').style.display = 'none';
+
+                    clearInputs();
+                } else {
+                    retryBox.className = "feedback-box feedback-solution";
+                    retryTitle.innerHTML = currentLang === 'zh' ? "📘 沒關係，我們一起來看解題過程！" : "📘 Let's review the step-by-step solution!";
+
+                    let solutionHtml = "";
+                    let rawImpNum = q.whole * q.den + q.num;
+
+                    if (q.type === 1) {
+                        let stepGcd = gcd(rawImpNum, q.den);
+                        let gHtml = stepGcd > 1 ? `<li><b>步驟 4 (約分)：</b>分子與分母同除以最大公因數 <b>${stepGcd}</b>，得最簡分數。</li>` : '';
+                        
+                        solutionHtml = currentLang === 'zh' ? `
+                            別灰心，學習就是從錯誤中學習！這道題的步驟如下：
+                            <ol class="solution-steps">
+                                <li><b>步驟 1：</b>整數 <b>${q.whole}</b> 乘以分母 <b>${q.den}</b> 得 <b>${q.whole * q.den}</b>。</li>
+                                <li><b>步驟 2：</b>加上原本的分子 <b>${q.num}</b>，得分子 <b>${rawImpNum}</b>。</li>
+                                <li><b>步驟 3：</b>初步分數為 <span class="fraction-display"><span class="fraction-num">${rawImpNum}</span><span class="fraction-den">${q.den}</span></span>。</li>
+                                ${gHtml}
+                                <li><b>最簡答案：</b> <span class="fraction-display" style="font-weight:bold;"><span class="fraction-num">${q.targetNum}</span><span class="fraction-den">${q.targetDen}</span></span></li>
+                            </ol>
+                        ` : `
+                            Don't worry! Here is the step-by-step solution:
+                            <ol class="solution-steps">
+                                <li><b>Step 1:</b> Multiply whole number <b>${q.whole}</b> by denominator <b>${q.den}</b> = <b>${q.whole * q.den}</b>.</li>
+                                <li><b>Step 2:</b> Add numerator <b>${q.num}</b> = <b>${rawImpNum}</b>.</li>
+                                <li><b>Step 3:</b> Reduce to lowest terms by dividing by <b>${stepGcd}</b>.</li>
+                                <li><b>Simplest Answer:</b> ${q.targetNum}/${q.targetDen}</li>
+                            </ol>
+                        `;
+                    } else {
+                        let stepGcd = gcd(q.num, q.den);
+                        let gHtml = stepGcd > 1 ? `<li><b>步驟 4 (約分)：</b>分數部分分子與分母同除以 <b>${stepGcd}</b>，約至最簡。</li>` : '';
+
+                        let resultDisplay = q.targetNum === 0 
+                            ? `<b>${q.targetWhole}</b>` 
+                            : `<b>${q.targetWhole}</b> <span class="fraction-display" style="font-weight:bold;"><span class="fraction-num">${q.targetNum}</span><span class="fraction-den">${q.targetDen}</span></span>`;
+
+                        solutionHtml = currentLang === 'zh' ? `
+                            別灰心，學習就是從錯誤中學習！這道題的步驟如下：
+                            <ol class="solution-steps">
+                                <li><b>步驟 1：</b>計算分子除以分母：<b>${rawImpNum} ÷ ${q.den} = ${q.whole} ... 餘 ${q.num}</b>。</li>
+                                <li><b>步驟 2：</b>商數 <b>${q.whole}</b> 為整數部分。</li>
+                                <li><b>步驟 3：</b>餘數 <b>${q.num}</b> 為分子，分母保持 <b>${q.den}</b>。</li>
+                                ${gHtml}
+                                <li><b>最簡答案：</b> ${resultDisplay}</li>
+                            </ol>
+                        ` : `
+                            Don't worry! Here is the step-by-step solution:
+                            <ol class="solution-steps">
+                                <li><b>Step 1:</b> Divide numerator by denominator: <b>${rawImpNum} ÷ ${q.den} = ${q.whole} R ${q.num}</b>.</li>
+                                <li><b>Step 2:</b> Quotient <b>${q.whole}</b> is whole number part.</li>
+                                <li><b>Step 3:</b> Reduce fraction part by dividing by <b>${stepGcd}</b>.</li>
+                                <li><b>Simplest Answer:</b> ${q.targetNum === 0 ? q.targetWhole : `${q.targetWhole} and ${q.targetNum}/${q.targetDen}`}</li>
+                            </ol>
+                        `;
+                    }
+
+                    retryHint.innerHTML = solutionHtml;
+                    retryBtn.innerText = t.nextBtn;
+                    retryBtn.onclick = nextQuestion;
+
+                    document.getElementById('submit-btn').style.display = 'none';
+                    retryBox.style.display = 'block';
+                    document.getElementById('feedback-success').style.display = 'none';
+
+                    clearInputs();
+                }
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < 10) {
+                loadQuestion();
+            } else {
+                showAnalysis();
+            }
+        }
+
+        function showAnalysis() {
+            showView('view-analysis');
+            const t = i18n[currentLang];
+            
+            document.getElementById('report-sub-score').innerText = `${t.subScoreTxt}: ${userStats.firstTryCorrectCount} / 10`;
+
+            let strText = "";
+            let weakText = "";
+
+            if (userStats.firstTryCorrectCount >= 8) {
+                strText = t.strHigh;
+                weakText = t.weakHigh;
+            } else if (userStats.firstTryCorrectCount >= 5) {
+                strText = t.strMid;
+                weakText = t.weakMid;
+            } else {
+                strText = t.strLow;
+                weakText = t.weakLow;
+            }
+
+            document.getElementById('strength-detail-txt').innerText = strText;
+            document.getElementById('weakness-detail-txt').innerText = weakText;
+
+            const correctContainer = document.getElementById('correct-items-list');
+            const correctItems = userStats.records.filter(r => r.firstTryCorrect);
+            if (correctItems.length === 0) {
+                correctContainer.innerHTML = `<div class="list-empty-text">${t.noCorrectMsg}</div>`;
+            } else {
+                correctContainer.innerHTML = correctItems.map(item => `
+                    <div class="item-row correct-row">
+                        <span class="q-title">${t.qPrefix} ${item.qIndex} ${t.qSuffix} : ${item.questionText}</span>
+                        <div class="ans-details">
+                            <span>${t.correctAns} : <span class="correct-ans">${item.correctAnswer}</span></span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const wrongContainer = document.getElementById('wrong-items-list');
+            const wrongItems = userStats.records.filter(r => !r.firstTryCorrect);
+            if (wrongItems.length === 0) {
+                wrongContainer.innerHTML = `<div class="list-empty-text">${t.noWrongMsg}</div>`;
+            } else {
+                wrongContainer.innerHTML = wrongItems.map(item => `
+                    <div class="item-row wrong-row">
+                        <span class="q-title">${t.qPrefix} ${item.qIndex} ${t.qSuffix} : ${item.questionText}</span>
+                        <div class="ans-details">
+                            <span>${t.yourAns} : <span class="user-ans">${item.firstWrongAnswer}</span></span>
+                            <span>|</span>
+                            <span>${t.correctAns} : <span class="correct-ans">${item.correctAnswer}</span></span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openRetryModal() {
+            document.getElementById('modal-retry').classList.add('active');
+        }
+
+        function closeRetryModal() {
+            document.getElementById('modal-retry').classList.remove('active');
+        }
+
+        function confirmRetry() {
+            closeRetryModal();
+            startQuiz(currentLevel);
+        }
+
+        updateLanguageUI();
+    </script>
+</body>
+</html>
